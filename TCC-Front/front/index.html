@@ -1,0 +1,1764 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MONITECH — Monitor de Energia Residencial</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" as="script">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+
+<body>
+
+  <div class="grid-bg"></div>
+  <canvas id="particles"></canvas>
+
+
+  <!-- ===== TELA DE LOGIN ===== -->
+  <div class="page active" id="page-login">
+    <div class="auth-wrap">
+      <div class="auth-box">
+
+        <div class="logo">
+          <span class="logo-text">MONITECH</span>
+        </div>
+
+        <div class="auth-title">ACESSO AO PAINEL</div>
+        <div class="auth-sub">Acompanhe o consumo energético da sua residência em tempo real</div>
+
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input class="form-input" type="email" id="login-email" placeholder="seu@email.com">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Senha</label>
+          <input class="form-input" type="password" id="login-pass" placeholder="Digite sua senha">
+        </div>
+
+        <button class="btn btn-primary" onclick="fazerLogin()">ENTRAR NO SISTEMA</button>
+
+        <div class="auth-switch">
+          Não tem conta? <a onclick="mostrarPagina('page-register')">Cadastre-se agora</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!-- ===== /TELA DE LOGIN ===== -->
+
+
+  <!-- ===== TELA DE CADASTRO ===== -->
+  <div class="page" id="page-register">
+    <div class="auth-wrap">
+      <div class="auth-box">
+
+        <div class="logo">
+          <div class="logo-icon"><span class="logo-bolt"></span></div>
+          <span class="logo-text">MONITECH</span>
+        </div>
+
+        <div class="auth-title">CRIAR CONTA</div>
+        <div class="auth-sub">Cadastre-se, configure sua residência e comece a monitorar agora</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nome</label>
+            <input class="form-input" type="text" id="reg-name" placeholder="Seu nome">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sobrenome</label>
+            <input class="form-input" type="text" id="reg-lastname" placeholder="Sobrenome">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input class="form-input" type="email" id="reg-email" placeholder="seu@email.com">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Senha</label>
+            <input class="form-input" type="password" id="reg-pass" placeholder="Mínimo 8 caracteres">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirmar Senha</label>
+            <input class="form-input" type="password" id="reg-pass2" placeholder="Repita a senha">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tipo de Residência</label>
+          <select class="form-input" id="reg-type">
+            <option value="">Selecione o tipo de imóvel...</option>
+            <option value="house">Casa</option>
+            <option value="apartment">Apartamento</option>
+            <option value="commercial">Comercial</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary" onclick="cadastrarUsuario()">CRIAR CONTA E CONFIGURAR</button>
+
+        <div class="auth-switch">
+          Já tem conta? <a onclick="mostrarPagina('page-login')">Fazer login</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!-- ===== /TELA DE CADASTRO ===== -->
+
+
+  <!-- ===== ONBOARDING ===== -->
+  <div class="page" id="page-onboard">
+    <div class="onboard-wrap">
+
+      <div class="onboard-header">
+        <div class="logo logo--center">
+          <span class="logo-text">MONITECH</span>
+        </div>
+        <div class="onboard-config-label">Configuração Inicial da Residência</div>
+      </div>
+
+      <div class="onboard-box">
+
+        <div class="steps" id="onboard-steps">
+          <div class="step-item active" id="s0"></div>
+          <div class="step-item" id="s1"></div>
+          <div class="step-item" id="s2"></div>
+        </div>
+
+        <!-- ETAPA 0: Dados da Residência -->
+        <div class="onboard-step active" id="step-0">
+          <div class="section-title">Sua <span>Residência</span></div>
+          <div class="step-desc">Informe os dados da sua residência para personalizar o monitoramento</div>
+
+          <div class="form-group">
+            <label class="form-label">Nome da Residência</label>
+            <input class="form-input" id="house-name" placeholder="Ex: Minha Casa, Apartamento 204...">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">CEP</label>
+              <input class="form-input" id="house-cep" placeholder="00000-000">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Área (m²)</label>
+              <input class="form-input" type="number" id="house-area" placeholder="Ex: 120">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Distribuidora de Energia</label>
+            <select class="form-input" id="house-dist">
+              <option>CEMIG</option>
+              <option>ENEL</option>
+              <option>CPFL</option>
+              <option>Eletropaulo</option>
+              <option>Coelba</option>
+              <option>Celpe</option>
+              <option>Outra</option>
+            </select>
+          </div>
+
+          <button class="btn btn-primary" onclick="proximoOnboarding(0)">PRÓXIMO — CÔMODOS</button>
+        </div>
+
+        <!-- ETAPA 1: Cadastro de Cômodos -->
+        <div class="onboard-step" id="step-1">
+          <div class="section-title"><span>Cômodos</span></div>
+          <div class="step-desc--sm">Cadastre os cômodos da sua residência para organizar o monitoramento por área</div>
+
+          <div id="rooms-setup-list"></div>
+
+          <div class="room-add-row">
+            <select class="form-input select-flex" id="new-room-type">
+              <option value="sala">Sala de Estar</option>
+              <option value="quarto">Quarto</option>
+              <option value="cozinha">Cozinha</option>
+              <option value="banheiro">Banheiro</option>
+              <option value="garagem">Garagem</option>
+              <option value="escritorio">Escritório</option>
+              <option value="lavanderia">Lavanderia</option>
+              <option value="varanda">Varanda</option>
+              <option value="outro">Outro</option>
+            </select>
+            <input class="form-input input-flex" id="new-room-name" placeholder="Nome do cômodo">
+            <button class="btn btn-primary btn--nowrap" onclick="adicionarComodoConfiguracao()">+ Adicionar</button>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-secondary btn-group__back" onclick="voltarOnboarding(1)">← VOLTAR</button>
+            <button class="btn btn-primary btn-group__next" onclick="proximoOnboarding(1)">PRÓXIMO — DISPOSITIVOS</button>
+          </div>
+        </div>
+
+        <!-- ETAPA 2: Cadastro de Dispositivos -->
+        <div class="onboard-step" id="step-2">
+          <div class="section-title">Dispositivos</div>
+          <div class="step-desc--sm">Adicione os equipamentos elétricos que deseja acompanhar em cada cômodo</div>
+
+          <div id="devices-setup-list"></div>
+
+          <div class="device-add-card">
+            <div class="form-row">
+              <div class="form-group form-group--compact">
+                <label class="form-label">Tipo de Dispositivo</label>
+                <select class="form-input" id="dev-type">
+                  <option value="ar">Ar-condicionado</option>
+                  <option value="geladeira">Geladeira</option>
+                  <option value="tv">Televisão</option>
+                  <option value="maquina">Máq. de Lavar</option>
+                  <option value="chuveiro">Chuveiro Elétrico</option>
+                  <option value="computador">Computador</option>
+                  <option value="microondas">Micro-ondas</option>
+                  <option value="iluminacao">Iluminação</option>
+                  <option value="bomba">Bomba d'água</option>
+                  <option value="outro">Outro</option>
+                </select>
+              </div>
+              <div class="form-group form-group--compact">
+                <label class="form-label">Nome do Dispositivo</label>
+                <input class="form-input" id="dev-name" placeholder="Ex: Ar-condicionado Quarto 1">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group form-group--flush">
+                <label class="form-label">Cômodo</label>
+                <select class="form-input" id="dev-room"></select>
+              </div>
+              <div class="form-group form-group--flush">
+                <label class="form-label">Potência (W)</label>
+                <input class="form-input" type="number" id="dev-watts" placeholder="Ex: 1500">
+              </div>
+            </div>
+            <button class="btn btn-secondary btn-sm mt-12" onclick="adicionarDispositivoConfiguracao()">
+              + Adicionar Dispositivo
+            </button>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-secondary btn-group__back" onclick="voltarOnboarding(2)">← VOLTAR</button>
+            <button class="btn btn-primary btn-group__next" onclick="finalizarOnboarding()">ACESSAR O PAINEL</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!-- ===== /ONBOARDING ===== -->
+
+
+  <!-- ===== APLICAÇÃO PRINCIPAL ===== -->
+  <div class="page" id="page-app">
+    <div class="app-layout">
+
+      <!-- BARRA SUPERIOR -->
+      <div class="topbar">
+
+        <div class="topbar-logo">
+          <span class="logo-bolt logo-bolt--nav"></span>
+          <span class="logo-text">MONITECH</span>
+        </div>
+
+        <div class="nav-tabs">
+          <button class="nav-tab active" onclick="exibirAba('dashboard')" id="tab-dashboard"><span>Dashboard</span></button>
+          <button class="nav-tab" onclick="exibirAba('planta')" id="tab-planta"><span>Planta</span></button>
+          <button class="nav-tab" onclick="exibirAba('rooms')" id="tab-rooms"><span>Cômodos</span></button>
+          <button class="nav-tab" onclick="exibirAba('devices')" id="tab-devices"><span>Dispositivos</span></button>
+          <button class="nav-tab" onclick="exibirAba('reports')" id="tab-reports"><span>Relatórios</span></button>
+          <button class="nav-tab" onclick="exibirAba('alerts')" id="tab-alerts"><span>Alertas</span></button>
+          <button class="nav-tab nav-tab--rel" onclick="exibirAba('esp32')" id="tab-esp32">
+            <span>Dispositivo MONITECH</span>
+            <span id="esp32-nav-dot" class="esp32-nav-dot"></span>
+          </button>
+        </div>
+
+        <div class="topbar-right">
+          <div class="live-badge">
+            <span class="status-dot"></span> AO VIVO
+          </div>
+          <div class="user-menu-wrapper">
+            <button class="btn btn-secondary btn-sm user-menu-btn" onclick="alternarMenuUsuario()">
+              <span id="user-badge-text">Usuário</span>
+              <span class="menu-arrow">▾</span>
+            </button>
+            <div class="user-dropdown-menu" id="user-dropdown">
+              <a class="dropdown-item" onclick="irParaConta()">Minha Conta</a>
+              <a class="dropdown-item" onclick="irParaConfiguracoes()">Configurações</a>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item dropdown-danger" onclick="sair()">Sair da Sessão</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- /BARRA SUPERIOR -->
+
+
+      <div class="main-content">
+
+
+        <!-- ===== ABA: DASHBOARD ===== -->
+        <div class="view active" id="view-dashboard">
+
+          <div class="section-header">
+            <div class="section-title"><span>Dashboard</span> de Energia</div>
+            <div class="period-filter">
+              <select class="form-input select-inline" id="period-select" onchange="atualizarGraficos()">
+                <option value="day">Hoje</option>
+                <option value="week">Esta Semana</option>
+                <option value="month">Este Mês</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Medidores ao vivo -->
+          <div class="chart-card chart-card--mb">
+            <div class="chart-title">
+              LEITURA AO VIVO — DISPOSITIVO ID:
+              <span id="device-id" class="device-id-span">---</span>
+            </div>
+            <div class="gauge-wrap" id="gauges-wrap">
+
+              <div class="gauge-item">
+                <div class="gauge-ring">
+                  <svg class="gauge-svg" viewBox="0 0 90 90">
+                    <circle class="gauge-bg" cx="45" cy="45" r="36" />
+                    <circle class="gauge-fill" id="g-volts" cx="45" cy="45" r="36" stroke="#1a7eff" stroke-dasharray="226" stroke-dashoffset="57" />
+                  </svg>
+                  <div class="gauge-val" id="gv-volts">---</div>
+                </div>
+                <div class="gauge-unit">VOLTS</div>
+                <div class="gauge-label">Tensão</div>
+              </div>
+
+              <div class="gauge-item">
+                <div class="gauge-ring">
+                  <svg class="gauge-svg" viewBox="0 0 90 90">
+                    <circle class="gauge-bg" cx="45" cy="45" r="36" />
+                    <circle class="gauge-fill" id="g-amps" cx="45" cy="45" r="36" stroke="#00d4ff" stroke-dasharray="226" stroke-dashoffset="160" />
+                  </svg>
+                  <div class="gauge-val" id="gv-amps">---</div>
+                </div>
+                <div class="gauge-unit">AMPERES</div>
+                <div class="gauge-label">Corrente</div>
+              </div>
+
+              <div class="gauge-item">
+                <div class="gauge-ring">
+                  <svg class="gauge-svg" viewBox="0 0 90 90">
+                    <circle class="gauge-bg" cx="45" cy="45" r="36" />
+                    <circle class="gauge-fill" id="g-watts" cx="45" cy="45" r="36" stroke="#00ff9d" stroke-dasharray="226" stroke-dashoffset="90" />
+                  </svg>
+                  <div class="gauge-val" id="gv-watts">---</div>
+                </div>
+                <div class="gauge-unit">WATTS</div>
+                <div class="gauge-label">Potência</div>
+              </div>
+
+              <div class="gauge-item">
+                <div class="gauge-ring">
+                  <svg class="gauge-svg" viewBox="0 0 90 90">
+                    <circle class="gauge-bg" cx="45" cy="45" r="36" />
+                    <circle class="gauge-fill" id="g-pf" cx="45" cy="45" r="36" stroke="#ffaa00" stroke-dasharray="226" stroke-dashoffset="34" />
+                  </svg>
+                  <div class="gauge-val" id="gv-pf">---</div>
+                </div>
+                <div class="gauge-unit">FP</div>
+                <div class="gauge-label">Fator de Potência</div>
+              </div>
+
+              <div class="gauge-item">
+                <div class="gauge-ring">
+                  <svg class="gauge-svg" viewBox="0 0 90 90">
+                    <circle class="gauge-bg" cx="45" cy="45" r="36" />
+                    <circle class="gauge-fill" id="g-freq" cx="45" cy="45" r="36" stroke="#7df9ff" stroke-dasharray="226" stroke-dashoffset="45" />
+                  </svg>
+                  <div class="gauge-val" id="gv-freq">---</div>
+                </div>
+                <div class="gauge-unit">Hz</div>
+                <div class="gauge-label">Frequência</div>
+              </div>
+
+              <div class="gauge-item">
+                <div class="gauge-ring">
+                  <svg class="gauge-svg" viewBox="0 0 90 90">
+                    <circle class="gauge-bg" cx="45" cy="45" r="36" />
+                    <circle class="gauge-fill" id="g-kwh" cx="45" cy="45" r="36" stroke="#ff3d6b" stroke-dasharray="226" stroke-dashoffset="100" />
+                  </svg>
+                  <div class="gauge-val" id="gv-kwh">---</div>
+                </div>
+                <div class="gauge-unit">kWh</div>
+                <div class="gauge-label">Consumo do Dia</div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Cartões de estatísticas -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">⚡</div>
+              <div><span class="stat-value" id="stat-kwh">---</span><span class="stat-unit">kWh</span></div>
+              <div class="stat-label">Consumo de Hoje</div>
+              <div class="stat-change">Aguardando leitura</div>
+              <div class="stat-glow stat-glow--blue"></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">💰</div>
+              <div><span class="stat-value" id="stat-cost">R$ ---</span></div>
+              <div class="stat-label">Custo Estimado Hoje</div>
+              <div class="stat-change">Baseado na tarifa configurada</div>
+              <div class="stat-glow stat-glow--warn"></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">📅</div>
+              <div><span class="stat-value" id="stat-month">---</span><span class="stat-unit">kWh</span></div>
+              <div class="stat-label">Consumo no Mês</div>
+              <div class="stat-change">Acumulado até agora</div>
+              <div class="stat-glow stat-glow--success"></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">📈</div>
+              <div><span class="stat-value" id="stat-peak">---</span><span class="stat-unit">kW</span></div>
+              <div class="stat-label">Pico de Potência</div>
+              <div class="stat-change">Maior valor registrado hoje</div>
+              <div class="stat-glow stat-glow--danger"></div>
+            </div>
+          </div>
+
+          <!-- Gráficos -->
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-title">CONSUMO POR HORA (kWh)</div>
+              <div class="chart-wrap chart-wrap--h260"><canvas id="chart-hourly"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">CONSUMO POR CÔMODO</div>
+              <div class="chart-wrap chart-wrap--h260"><canvas id="chart-rooms-pie"></canvas></div>
+            </div>
+          </div>
+
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-title">HISTÓRICO MENSAL (kWh)</div>
+              <div class="chart-wrap chart-wrap--h220"><canvas id="chart-monthly"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">TOP DISPOSITIVOS — MAIOR CONSUMO</div>
+              <div class="chart-wrap chart-wrap--h220"><canvas id="chart-devices-bar"></canvas></div>
+            </div>
+          </div>
+
+        </div>
+        <!-- ===== /ABA: DASHBOARD ===== -->
+
+
+        <!-- ===== ABA: PLANTA INTERATIVA ===== -->
+        <div class="view" id="view-planta">
+
+          <div class="section-header">
+            <div class="section-title">Planta <span>Interativa</span></div>
+            <div class="live-badge"><span class="status-dot"></span> TEMPO REAL</div>
+          </div>
+
+          <div class="floor-plan-wrap">
+            <div class="floor-plan-header">
+              <div>
+                <div class="house-name-label" id="house-label">Minha Casa</div>
+                <div class="floor-hint">Clique em um cômodo para visualizar consumo detalhado e dispositivos</div>
+              </div>
+              <div class="floor-legend">
+                <span>● Normal</span>
+                <span class="floor-legend__warn">● Médio</span>
+                <span class="floor-legend__danger">● Alto</span>
+              </div>
+            </div>
+            <div class="floor-grid" id="floor-grid"></div>
+          </div>
+
+          <div id="room-detail-panel" class="room-detail-panel">
+            <div class="chart-card">
+              <div class="chart-title" id="detail-room-title">SALA DE ESTAR</div>
+              <div class="room-detail-inner">
+                <div>
+                  <div class="room-detail-hint">Dispositivos instalados neste cômodo:</div>
+                  <div id="detail-devices-list"></div>
+                </div>
+                <div class="chart-wrap chart-wrap--h200">
+                  <canvas id="chart-room-detail"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- ===== /ABA: PLANTA INTERATIVA ===== -->
+
+
+        <!-- ===== ABA: CÔMODOS ===== -->
+        <div class="view" id="view-rooms">
+          <div class="section-header">
+            <div class="section-title"><span>Cômodos</span></div>
+            <button class="btn btn-secondary btn-sm" onclick="abrirModalAdicionarComodo()">+ Novo Cômodo</button>
+          </div>
+          <div class="rooms-grid" id="rooms-grid"></div>
+        </div>
+        <!-- ===== /ABA: CÔMODOS ===== -->
+
+
+        <!-- ===== ABA: DISPOSITIVOS ===== -->
+        <div class="view" id="view-devices">
+          <div class="section-header">
+            <div class="section-title">Dispositivos</div>
+            <button class="btn btn-secondary btn-sm" onclick="abrirModalAdicionarDispositivo()">+ Novo Dispositivo</button>
+          </div>
+          <div class="table-scroll">
+            <table class="devices-table" id="devices-table">
+              <thead>
+                <tr>
+                  <th>Dispositivo</th>
+                  <th>Cômodo</th>
+                  <th>Status</th>
+                  <th>Potência (W)</th>
+                  <th>Consumo Hoje</th>
+                  <th>kWh/Mês</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="devices-tbody"></tbody>
+            </table>
+          </div>
+          <div class="chart-card devices-chart">
+            <div class="chart-title">COMPARATIVO DE CONSUMO POR DISPOSITIVOS (kWh hoje)</div>
+            <div class="chart-wrap chart-wrap--h280"><canvas id="chart-devices-full"></canvas></div>
+          </div>
+        </div>
+        <!-- ===== /ABA: DISPOSITIVOS ===== -->
+
+
+        <!-- ===== ABA: RELATÓRIOS ===== -->
+        <div class="view" id="view-reports">
+          <div class="section-header">
+            <div class="section-title">Relatórios</div>
+            <div class="report-actions">
+              <select class="form-input select-inline" id="report-period">
+                <option value="week">Última Semana</option>
+                <option value="month">Último Mês</option>
+                <option value="year">Último Ano</option>
+              </select>
+              <button class="btn btn-secondary btn-sm" onclick="exportarRelatorio()">📄 Exportar</button>
+            </div>
+          </div>
+
+          <div class="report-grid">
+            <div class="chart-card">
+              <div class="chart-title">CONSUMO DIÁRIO (kWh)</div>
+              <div class="chart-wrap chart-wrap--h240"><canvas id="chart-rep-daily"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">CUSTO ESTIMADO (R$)</div>
+              <div class="chart-wrap chart-wrap--h240"><canvas id="chart-rep-cost"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">TENSÃO MÉDIA (V)</div>
+              <div class="chart-wrap chart-wrap--h220"><canvas id="chart-rep-volts"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">CORRENTE MÉDIA (A)</div>
+              <div class="chart-wrap chart-wrap--h220"><canvas id="chart-rep-amps"></canvas></div>
+            </div>
+          </div>
+
+          <div class="chart-card report-summary">
+            <div class="chart-title chart-title--mb-16">RESUMO DO PERÍODO SELECIONADO</div>
+            <div class="table-scroll">
+              <table class="devices-table" id="report-table">
+                <thead>
+                  <tr>
+                    <th>Período</th>
+                    <th>Consumo (kWh)</th>
+                    <th>Custo (R$)</th>
+                    <th>Pico (W)</th>
+                    <th>Tensão Média (V)</th>
+                    <th>Corrente Média (A)</th>
+                  </tr>
+                </thead>
+                <tbody id="report-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+        <!-- ===== /ABA: RELATÓRIOS ===== -->
+
+
+        <!-- ===== ABA: ALERTAS ===== -->
+        <div class="view" id="view-alerts">
+          <div class="section-header">
+            <div class="section-title">Alertas &amp; Notificações</div>
+            <button class="btn btn-secondary btn-sm" onclick="limparAlertas()">Limpar todos</button>
+          </div>
+
+          <div class="alerts-layout">
+            <div>
+              <div class="alert-list" id="alerts-list"></div>
+            </div>
+            <div>
+              <div class="chart-card">
+                <div class="chart-title chart-title--mb-12">CONFIGURAR LIMITES DE ALERTA</div>
+                <div class="form-group">
+                  <label class="form-label">Limite de Consumo (kWh/dia)</label>
+                  <input class="form-input" type="number" id="alert-kwh-limit" placeholder="Ex: 20">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Limite de Custo (R$/mês)</label>
+                  <input class="form-input" type="number" id="alert-cost-limit" placeholder="Ex: 300">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Tensão Mínima Permitida (V)</label>
+                  <input class="form-input" type="number" id="alert-volt-min" placeholder="Ex: 200">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Tensão Máxima Permitida (V)</label>
+                  <input class="form-input" type="number" id="alert-volt-max" placeholder="Ex: 240">
+                </div>
+                <button class="btn btn-primary btn-save-alerts" onclick="salvarConfiguracaoAlertas()">
+                  SALVAR CONFIGURAÇÕES
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- ===== /ABA: ALERTAS ===== -->
+
+
+        <!-- ===== ABA: Dispositivo Monitech ===== -->
+        <div class="view" id="view-esp32">
+
+          <div class="section-header">
+            <div class="section-title">Conexão <span>Dispositivo Monitech</span></div>
+            <div class="esp32-status-wrap">
+              <div id="esp-live-badge" class="live-badge live-badge--disconnected">
+                <span id="esp-dot" class="esp-dot-base"></span>
+                <span id="esp-live-text">DESCONECTADO</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grid principal: configuração + status -->
+          <div class="esp32-main-grid">
+
+            <!-- Configuração de conexão -->
+            <div class="chart-card">
+              <div class="chart-title chart-title--mb-20">Configuração de Conexão Dispositivo Monitech</div>
+
+              <div class="proto-selector">
+                <button class="proto-btn active" id="proto-ws"     onclick="selecionarProtocoloConexao('ws')">WebSocket</button>
+                <button class="proto-btn"        id="proto-http"   onclick="selecionarProtocoloConexao('http')">HTTP Poll</button>
+                <button class="proto-btn"        id="proto-mqtt"   onclick="selecionarProtocoloConexao('mqtt')">MQTT</button>
+                <button class="proto-btn"        id="proto-serial" onclick="selecionarProtocoloConexao('serial')">Serial/USB</button>
+              </div>
+
+              <!-- Campos WebSocket -->
+              <div id="fields-ws">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Endereço IP do Dispositivo Monitech</label>
+                    <input class="form-input" id="esp-ip" placeholder="192.168.1.100" value="192.168.1.100">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Porta WebSocket</label>
+                    <input class="form-input" id="esp-port-ws" placeholder="81" value="81">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Endpoint WebSocket</label>
+                  <input class="form-input" id="esp-ws-path" placeholder="/ws" value="/ws">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">URL Completa (gerada automaticamente)</label>
+                  <div class="esp-url-display" id="esp-url-preview">ws://192.168.1.100:81/ws</div>
+                </div>
+              </div>
+
+              <!-- Campos HTTP -->
+              <div id="fields-http">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Endereço IP do Dispositivo Monitech</label>
+                    <input class="form-input" id="esp-ip-http" placeholder="192.168.1.100" value="192.168.1.100">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Porta HTTP</label>
+                    <input class="form-input" id="esp-port-http" placeholder="80" value="80">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Endpoint de Leitura de Dados</label>
+                  <input class="form-input" id="esp-http-path" placeholder="/api/data" value="/api/data">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Intervalo de Atualização (ms)</label>
+                  <input class="form-input" type="number" id="esp-poll-interval" value="2000" min="500" max="60000">
+                </div>
+              </div>
+
+              <!-- Campos MQTT -->
+              <div id="fields-mqtt">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Endereço do Broker MQTT</label>
+                    <input class="form-input" id="esp-mqtt-broker" placeholder="broker.hivemq.com">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Porta</label>
+                    <input class="form-input" id="esp-mqtt-port" placeholder="1883" value="1883">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Tópico Principal</label>
+                    <input class="form-input" id="esp-mqtt-topic" placeholder="MONITECH/home/energy" value="MONITECH/home/energy">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Client ID</label>
+                    <input class="form-input" id="esp-mqtt-cid" placeholder="MONITECH-001" value="MONITECH-001">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Usuário MQTT (opcional)</label>
+                    <input class="form-input" id="esp-mqtt-user" placeholder="usuario">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Senha MQTT (opcional)</label>
+                    <input class="form-input" type="password" id="esp-mqtt-pass" placeholder="senha">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Campos Serial/USB -->
+              <div id="fields-serial">
+                <div class="info-box">
+                  A conexão Serial/USB requer que o site seja acessado via
+                  <strong>Chrome ou Edge</strong> com suporte à <strong>Web Serial API</strong>.<br>
+                  Conecte o Dispositivo Monitech via cabo USB e clique em "Selecionar Porta Serial".
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Baud Rate</label>
+                    <select class="form-input" id="esp-baud">
+                      <option value="9600">9600</option>
+                      <option value="115200" selected>115200</option>
+                      <option value="230400">230400</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <button class="btn btn-secondary" onclick="selecionarPortaSerial()">Selecionar Porta Serial</button>
+                  </div>
+                </div>
+                <div id="serial-port-info" class="serial-info-display">
+                  Porta serial selecionada com sucesso
+                </div>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">ID do Dispositivo</label>
+                  <input class="form-input" id="esp-device-id" placeholder="Ex: MONITECH-001" value="">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Apelido do Dispositivo</label>
+                  <input class="form-input" id="esp-device-alias" placeholder="Ex: Medidor Principal">
+                </div>
+              </div>
+
+              <div class="conn-actions">
+                <button class="btn btn-primary btn--flex-2" id="btn-connect" onclick="conectarESP32()">CONECTAR</button>
+                <button class="btn btn-secondary btn--flex-1" id="btn-disconnect" onclick="desconectarESP32()" disabled>DESCONECTAR</button>
+                <button class="btn btn-secondary btn-sm" onclick="verificarConexaoESP32()" title="Testar conectividade com o dispositivo">PING</button>
+              </div>
+            </div>
+
+            <!-- Coluna de status -->
+            <div class="esp-status-col">
+
+              <div class="chart-card">
+                <div class="chart-title chart-title--mb-16">STATUS DA CONEXãO</div>
+                <div class="conn-status-body">
+
+                  <div class="conn-diagram">
+                    <div class="conn-node">
+                      <div class="conn-node__icon">🖥️</div>
+                      <div class="conn-node__label">NAVEGADOR</div>
+                    </div>
+                    <div class="conn-wire">
+                      <div id="conn-line" class="conn-line">
+                        <div id="conn-pulse" class="conn-pulse"></div>
+                      </div>
+                      <div id="conn-proto-label" class="conn-proto-name">WebSocket</div>
+                    </div>
+                    <div class="conn-node">
+                      <div id="esp-icon" class="conn-esp__icon">🔌</div>
+                      <div class="conn-node__label">Dispositivo Monitech</div>
+                    </div>
+                  </div>
+
+                  <div class="conn-metrics">
+                    <div class="conn-metric">
+                      <div class="conn-metric__value" id="conn-latency">--</div>
+                      <div class="conn-metric__label">LATÊNCIA (ms)</div>
+                    </div>
+                    <div class="conn-metric">
+                      <div class="conn-metric__value" id="conn-packets">0</div>
+                      <div class="conn-metric__label">PACOTES RECEBIDOS</div>
+                    </div>
+                    <div class="conn-metric">
+                      <div class="conn-metric__value--sm" id="conn-uptime">--</div>
+                      <div class="conn-metric__label">TEMPO ATIVO</div>
+                    </div>
+                    <div class="conn-metric">
+                      <div class="conn-metric__value--sm" id="conn-rssi">--</div>
+                      <div class="conn-metric__label">SINAL Wi-Fi (dBm)</div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <div class="chart-card">
+                <div class="chart-title chart-title--mb-12">INFORMAÇÕES DO DISPOSITIVO</div>
+                <div id="esp-info-empty" class="esp-info-empty">
+                  Conecte um Dispositivo Monitech para visualizar as informações do hardware
+                </div>
+                <div id="esp-info-data">
+                  <div class="esp-info-list">
+                    <div class="esp-info-row">
+                      <span class="esp-info-key">Versão do Firmware</span>
+                      <span id="esp-fw" class="esp-info-val">---</span>
+                    </div>
+                    <div class="esp-info-row">
+                      <span class="esp-info-key">Chip ID</span>
+                      <span id="esp-chip" class="esp-info-val">---</span>
+                    </div>
+                    <div class="esp-info-row">
+                      <span class="esp-info-key">IP Local</span>
+                      <span id="esp-local-ip" class="esp-info-val">---</span>
+                    </div>
+                    <div class="esp-info-row">
+                      <span class="esp-info-key">Rede Wi-Fi (SSID)</span>
+                      <span id="esp-ssid" class="esp-info-val">---</span>
+                    </div>
+                    <div class="esp-info-row">
+                      <span class="esp-info-key">Sensor de Medição</span>
+                      <span id="esp-sensor" class="esp-info-val">---</span>
+                    </div>
+                    <div class="esp-info-row--last">
+                      <span class="esp-info-key">Memória Livre (Heap)</span>
+                      <span id="esp-heap" class="esp-info-val">---</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+          <!-- /Grid principal -->
+
+          <!-- Leituras ao vivo -->
+          <div class="esp32-live-grid">
+
+            <div class="chart-card">
+              <div class="chart-title chart-title--flex">
+                <span>LEITURA EM TEMPO REAL — Dispositivo Monitech</span>
+                <div class="esp-metric-selector">
+                  <button class="proto-btn active" id="esp-ch-volts" onclick="definirMetricaGraficoESP32('volts')">Volts</button>
+                  <button class="proto-btn"        id="esp-ch-amps"  onclick="definirMetricaGraficoESP32('amps')">Amperes</button>
+                  <button class="proto-btn"        id="esp-ch-watts" onclick="definirMetricaGraficoESP32('watts')">Watts</button>
+                </div>
+              </div>
+              <div class="esp-live-chart-wrap">
+                <canvas id="chart-esp-live"></canvas>
+                <div id="esp-chart-overlay" class="esp-chart-overlay">
+                  <div class="esp-overlay-icon">📡</div>
+                  <div class="esp-overlay-text">Aguardando conexão com o dispositivo Dispositivo Monitech...</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-title chart-title--mb-12">ÚLTIMO PACOTE JSON RECEBIDO</div>
+              <pre id="esp-last-packet" class="esp-last-packet">{
+  "aguardando": true
+}</pre>
+            </div>
+
+          </div>
+
+          <!-- Terminal de log -->
+          <div class="chart-card chart-card--mb">
+            <div class="terminal-header">
+              <span>TERMINAL DE LOG</span>
+              <div class="terminal-controls">
+                <label class="terminal-autoscroll">
+                  <input type="checkbox" id="esp-autoscroll" checked>
+                  Rolagem automática
+                </label>
+                <button class="btn btn-secondary btn-sm" onclick="limparTerminal()">🗑 Limpar</button>
+              </div>
+            </div>
+            <div id="esp-terminal" class="esp-terminal"></div>
+          </div>
+
+          <!-- Guia de firmware -->
+          <div class="chart-card">
+            <div class="chart-title chart-title--mb-16">FIRMWARE PARA Dispositivo Monitech — CÓDIGO DE REFERÊNCIA</div>
+
+            <div class="code-tab-selector">
+              <button class="proto-btn active" id="code-tab-ws"   onclick="exibirAbaCodigo('ws')">WebSocket</button>
+              <button class="proto-btn"        id="code-tab-http" onclick="exibirAbaCodigo('http')">HTTP POST</button>
+              <button class="proto-btn"        id="code-tab-mqtt" onclick="exibirAbaCodigo('mqtt')">MQTT</button>
+            </div>
+
+            <!-- Código WebSocket -->
+            <div id="codetab-ws">
+              <div class="code-header">
+                <span class="code-meta">Arduino IDE — Dispositivo Monitech com WebSocket Server e Medição PZEM-004T</span>
+                <button class="btn btn-secondary btn-sm" onclick="copiarCodigo('code-ws')">📋 Copiar</button>
+              </div>
+              <pre id="code-ws" class="code-block">#include &lt;WiFi.h&gt;
+#include &lt;WebSocketsServer.h&gt;
+#include &lt;ArduinoJson.h&gt;
+// Para PZEM-004T: #include &lt;PZEM004Tv30.h&gt;
+
+const char* SSID      = "SUA_REDE_WIFI";
+const char* PASSWORD  = "SUA_SENHA_WIFI";
+const char* DEVICE_ID = "MONITECH-001";
+const char* FW_VER    = "1.0.0";
+
+WebSocketsServer ws(81);
+// PZEM004Tv30 pzem(Serial2, 16, 17); // RX=16, TX=17
+
+unsigned long ultimoEnvio = 0;
+const int INTERVALO_ENVIO = 2000; // ms
+
+float lerVolts()  { return 0; }
+float lerAmps()   { return 0; }
+float lerWatts()  { return 0; }
+float lerFP()     { return 0; }
+float lerHz()     { return 0; }
+float lerKwh()    { return 0; }
+
+// Com PZEM-004T real (descomente):
+// float lerVolts()  { return pzem.voltage(); }
+// float lerAmps()   { return pzem.current(); }
+// float lerWatts()  { return pzem.power(); }
+// float lerFP()     { return pzem.pf(); }
+// float lerHz()     { return pzem.frequency(); }
+// float lerKwh()    { return pzem.energy(); }
+
+void enviarDados() {
+  StaticJsonDocument&lt;256&gt; doc;
+  doc["id"]     = DEVICE_ID;
+  doc["fw"]     = FW_VER;
+  doc["chip"]   = ESP.getEfuseMac();
+  doc["ip"]     = WiFi.localIP().toString();
+  doc["ssid"]   = WiFi.SSID();
+  doc["rssi"]   = WiFi.RSSI();
+  doc["heap"]   = ESP.getFreeHeap();
+  doc["sensor"] = "PZEM-004T";
+  doc["volts"]  = lerVolts();
+  doc["amps"]   = lerAmps();
+  doc["watts"]  = lerWatts();
+  doc["pf"]     = lerFP();
+  doc["hz"]     = lerHz();
+  doc["kwh"]    = lerKwh();
+  doc["ts"]     = millis();
+  String payload;
+  serializeJson(doc, payload);
+  ws.broadcastTXT(payload);
+}
+
+void eventoWS(uint8_t num, WStype_t tipo, uint8_t* payload, size_t tamanho) {
+  if (tipo == WStype_CONNECTED) enviarDados();
+}
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(SSID, PASSWORD);
+  while (WiFi.status() != WL_CONNECTED) { delay(500); }
+  ws.begin();
+  ws.onEvent(eventoWS);
+}
+
+void loop() {
+  ws.loop();
+  if (millis() - ultimoEnvio >= INTERVALO_ENVIO) { enviarDados(); ultimoEnvio = millis(); }
+}</pre>
+            </div>
+
+            <!-- Código HTTP -->
+            <div id="codetab-http">
+              <div class="code-header">
+                <span class="code-meta">Arduino IDE — Dispositivo Monitech com endpoint HTTP GET (polling pelo site)</span>
+                <button class="btn btn-secondary btn-sm" onclick="copiarCodigo('code-http')">📋 Copiar</button>
+              </div>
+              <pre id="code-http" class="code-block">#include &lt;WiFi.h&gt;
+#include &lt;WebServer.h&gt;
+#include &lt;ArduinoJson.h&gt;
+
+const char* SSID      = "SUA_REDE_WIFI";
+const char* PASSWORD  = "SUA_SENHA_WIFI";
+const char* DEVICE_ID = "MONITECH-001";
+
+WebServer server(80);
+
+float lerVolts()  { return 0; }
+float lerAmps()   { return 0; }
+float lerWatts()  { return 0; }
+float lerFP()     { return 0; }
+
+void handleDados() {
+  server.sendHeader("Access-Control-Allow-Origin", "*");
+  StaticJsonDocument&lt;256&gt; doc;
+  doc["id"]    = DEVICE_ID;
+  doc["volts"] = lerVolts();
+  doc["amps"]  = lerAmps();
+  doc["watts"] = lerWatts();
+  doc["pf"]    = lerFP();
+  doc["hz"]    = 60.0;
+  doc["kwh"]   = 12.4 + millis() / 3600000.0;
+  doc["rssi"]  = WiFi.RSSI();
+  doc["heap"]  = ESP.getFreeHeap();
+  doc["ts"]    = millis();
+  String json;
+  serializeJson(doc, json);
+  server.send(200, "application/json", json);
+}
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(SSID, PASSWORD);
+  while (WiFi.status() != WL_CONNECTED) { delay(500); }
+  server.on("/api/data", HTTP_GET, handleDados);
+  server.begin();
+}
+
+void loop() { server.handleClient(); }</pre>
+            </div>
+
+            <!-- Código MQTT -->
+            <div id="codetab-mqtt">
+              <div class="code-header">
+                <span class="code-meta">Arduino IDE — Dispositivo Monitech como Publisher MQTT</span>
+                <button class="btn btn-secondary btn-sm" onclick="copiarCodigo('code-mqtt')">📋 Copiar</button>
+              </div>
+              <pre id="code-mqtt" class="code-block">#include &lt;WiFi.h&gt;
+#include &lt;PubSubClient.h&gt;
+#include &lt;ArduinoJson.h&gt;
+
+const char* SSID        = "SUA_REDE_WIFI";
+const char* PASSWORD    = "SUA_SENHA_WIFI";
+const char* MQTT_SERVER = "broker.hivemq.com";
+const int   MQTT_PORT   = 1883;
+const char* TOPICO      = "MONITECH/home/energy";
+const char* DEVICE_ID   = "MONITECH-001";
+
+WiFiClient   espClient;
+PubSubClient mqtt(espClient);
+unsigned long ultimaMensagem = 0;
+
+float lerVolts() { return 220.0 + random(-10, 10) * 0.1; }
+float lerAmps()  { return 5.0  + random(-5, 5)  * 0.1; }
+
+void reconectar() {
+  while (!mqtt.connected()) {
+    if (mqtt.connect(DEVICE_ID)) mqtt.publish(TOPICO "/status", "online");
+    else delay(3000);
+  }
+}
+
+void publicarDados() {
+  StaticJsonDocument&lt;256&gt; doc;
+  float v = lerVolts(), a = lerAmps();
+  doc["id"]    = DEVICE_ID;
+  doc["volts"] = v; doc["amps"] = a;
+  doc["watts"] = v * a * 0.85;
+  doc["pf"]    = 0.85; doc["hz"] = 60.0;
+  doc["kwh"]   = 12.4 + millis() / 3600000.0;
+  doc["rssi"]  = WiFi.RSSI(); doc["ts"] = millis();
+  char buf[256];
+  serializeJson(doc, buf);
+  mqtt.publish(TOPICO, buf);
+}
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(SSID, PASSWORD);
+  while (WiFi.status() != WL_CONNECTED) { delay(500); }
+  mqtt.setServer(MQTT_SERVER, MQTT_PORT);
+}
+
+void loop() {
+  if (!mqtt.connected()) reconectar();
+  mqtt.loop();
+  if (millis() - ultimaMensagem > 2000) { publicarDados(); ultimaMensagem = millis(); }
+}</pre>
+            </div>
+
+            <div class="libs-box">
+              <div class="libs-title">BIBLIOTECAS NECESSÁRIAS (Arduino Library Manager)</div>
+              <div class="libs-list" id="libs-needed">
+                <span class="tag tag-blue">ArduinoJson (Benoit Blanchon)</span>
+                <span class="tag tag-cyan">PZEM-004T-v30</span>
+                <span class="tag tag-cyan">PubSubClient (MQTT)</span>
+              </div>
+            </div>
+
+          </div>
+          <!-- /Guia de firmware -->
+
+        </div>
+        <!-- ===== /ABA: Dispositivo Monitech ===== -->
+
+
+        <!-- ===== ABA: CONFIGURAÇÕES ===== -->
+        <div class="view" id="view-settings">
+
+          <div class="section-header">
+            <div class="section-title">Configurações</div>
+            <div class="settings-header-sub">Gerencie sua conta e preferências do sistema</div>
+          </div>
+
+          <div class="settings-container">
+
+            <div class="settings-tabs">
+              <button class="settings-tab active" onclick="exibirAbaConfiguracoes('profile')"       id="tab-profile">Perfil</button>
+              <button class="settings-tab"        onclick="exibirAbaConfiguracoes('house')"         id="tab-house">Residência</button>
+              <button class="settings-tab"        onclick="exibirAbaConfiguracoes('notifications')" id="tab-notifications">Notificações</button>
+              <button class="settings-tab"        onclick="exibirAbaConfiguracoes('personalization')" id="tab-personalization">Personalização</button>
+              <button class="settings-tab"        onclick="exibirAbaConfiguracoes('security')"      id="tab-security">Segurança</button>
+              <button class="settings-tab"        onclick="exibirAbaConfiguracoes('billing')"       id="tab-billing">Faturamento</button>
+              <button class="settings-tab"        onclick="exibirAbaConfiguracoes('about')"         id="tab-about">Sobre</button>
+            </div>
+
+            <div class="settings-content">
+
+              <!-- Perfil -->
+              <div class="settings-panel active" id="panel-profile">
+                <div class="panel-title">Informações do Perfil</div>
+                <div class="form-group">
+                  <label class="form-label">Nome Completo</label>
+                  <input class="form-input" type="text" id="set-name" placeholder="Seu nome completo">
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">E-mail</label>
+                    <input class="form-input" type="email" id="set-email" placeholder="seu@email.com" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Telefone (opcional)</label>
+                    <input class="form-input" type="tel" id="set-phone" placeholder="(XX) XXXXX-XXXX">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Foto de Perfil</label>
+                  <div class="avatar-wrapper">
+                    <div class="avatar-circle" id="profile-avatar">👤</div>
+                    <input type="file" id="set-avatar" accept="image/*" onchange="visualizarAvatar()" class="input-hidden">
+                    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('set-avatar').click()">Alterar Foto</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Idioma do Sistema</label>
+                  <select class="form-input" id="set-language">
+                    <option value="pt-BR">Português (Brasil)</option>
+                    <option value="en-US">English (USA)</option>
+                    <option value="es-ES">Español (España)</option>
+                  </select>
+                </div>
+                <button class="btn btn-primary" onclick="salvarPerfil()">Salvar Alterações</button>
+              </div>
+
+              <!-- Residência -->
+              <div class="settings-panel" id="panel-house">
+                <div class="panel-title">Configurações da Residência</div>
+                <div class="form-group">
+                  <label class="form-label">Nome da Residência</label>
+                  <input class="form-input" type="text" id="set-house-name" placeholder="Ex: Minha Casa">
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">CEP</label>
+                    <input class="form-input" type="text" id="set-house-cep" placeholder="00000-000">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Área (m²)</label>
+                    <input class="form-input" type="number" id="set-house-area" placeholder="Ex: 120">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Distribuidora de Energia</label>
+                  <select class="form-input" id="set-house-dist">
+                    <option>CEMIG</option><option>ENEL</option><option>CPFL</option>
+                    <option>Eletropaulo</option><option>Coelba</option><option>Celpe</option><option>Outra</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Tarifa de Energia (R$/kWh)</label>
+                  <input class="form-input" type="number" id="set-house-rate" placeholder="Ex: 0.85" step="0.01">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Tipo de Imóvel</label>
+                  <select class="form-input" id="set-house-type">
+                    <option value="house">Casa</option>
+                    <option value="apartment">Apartamento</option>
+                    <option value="commercial">Comercial</option>
+                  </select>
+                </div>
+                <button class="btn btn-primary" onclick="salvarConfiguracoesCasa()">Salvar Alterações</button>
+              </div>
+
+              <!-- Notificações -->
+              <div class="settings-panel" id="panel-notifications">
+                <div class="panel-title">Preferências de Notificações</div>
+                <div class="notification-section">
+                  <div class="notification-title">Notificações por E-mail</div>
+                  <div class="toggle-group">
+                    <label class="toggle-label"><input type="checkbox" class="toggle-input" id="not-email-alerts" checked onchange="salvarNotificacoes()"><span>Alertas de Consumo Elevado</span></label>
+                    <label class="toggle-label"><input type="checkbox" class="toggle-input" id="not-email-cost" checked onchange="salvarNotificacoes()"><span>Aviso ao Atingir Limite de Custo</span></label>
+                    <label class="toggle-label"><input type="checkbox" class="toggle-input" id="not-email-anomaly" checked onchange="salvarNotificacoes()"><span>Anomalias de Tensão ou Corrente Detectadas</span></label>
+                    <label class="toggle-label"><input type="checkbox" class="toggle-input" id="not-email-device" onchange="salvarNotificacoes()"><span>Novos Dispositivos Disponíveis para Cadastro</span></label>
+                  </div>
+                </div>
+                <div class="notification-section">
+                  <div class="notification-title">Notificações no Navegador</div>
+                  <div class="toggle-group">
+                    <label class="toggle-label"><input type="checkbox" class="toggle-input" id="not-browser-alerts" checked onchange="salvarNotificacoes()"><span>Ativar notificações push no navegador</span></label>
+                    <label class="toggle-label"><input type="checkbox" class="toggle-input" id="not-browser-sound" checked onchange="salvarNotificacoes()"><span>Som nas notificações de alerta</span></label>
+                  </div>
+                </div>
+                <div class="notification-section">
+                  <div class="notification-title">Frequência de Envio de Alertas</div>
+                  <div class="form-group">
+                    <label class="form-label">Agrupar alertas a cada (minutos)</label>
+                    <select class="form-input" id="not-frequency" onchange="salvarNotificacoes()">
+                      <option value="0">Imediato</option>
+                      <option value="5">5 minutos</option>
+                      <option value="15" selected>15 minutos</option>
+                      <option value="30">30 minutos</option>
+                      <option value="60">1 hora</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Personalização -->
+              <div class="settings-panel" id="panel-personalization">
+                <div class="panel-title">Personalização do Sistema</div>
+                <div class="notification-section">
+                  <div class="notification-title">Tema da Interface</div>
+                  <div class="theme-options">
+                    <label class="theme-option-card" for="theme-dark">
+                      <input
+                        class="theme-option-input"
+                        type="radio"
+                        name="theme-preference"
+                        id="theme-dark"
+                        value="dark"
+                        onchange="salvarPersonalizacao()"
+                      >
+                      <span class="theme-option-check"></span>
+                      <span class="theme-option-preview theme-option-preview-dark"></span>
+                      <span class="theme-option-content">
+                        <span class="theme-option-title">Escuro</span>
+                        <span class="theme-option-text">Ideal para ambientes com pouca luz e foco no painel.</span>
+                      </span>
+                    </label>
+
+                    <label class="theme-option-card" for="theme-light">
+                      <input
+                        class="theme-option-input"
+                        type="radio"
+                        name="theme-preference"
+                        id="theme-light"
+                        value="light"
+                        onchange="salvarPersonalizacao()"
+                      >
+                      <span class="theme-option-check"></span>
+                      <span class="theme-option-preview theme-option-preview-light"></span>
+                      <span class="theme-option-content">
+                        <span class="theme-option-title">Claro</span>
+                        <span class="theme-option-text">Visual limpo e luminoso para uso durante o dia.</span>
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="info-box">
+                  Tema atual:
+                  <strong id="theme-current-label">Escuro</strong>
+                </div>
+              </div>
+
+              <!-- Segurança -->
+              <div class="settings-panel" id="panel-security">
+                <div class="panel-title">Configurações de Segurança</div>
+                <div class="security-block">
+                  <div class="security-block-title">Alterar Senha de Acesso</div>
+                  <div class="form-group">
+                    <label class="form-label">Senha Atual</label>
+                    <input class="form-input" type="password" id="set-pass-current" placeholder="Digite sua senha atual">
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">Nova Senha</label>
+                      <input class="form-input" type="password" id="set-pass-new" placeholder="Mínimo 8 caracteres">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Confirmar Nova Senha</label>
+                      <input class="form-input" type="password" id="set-pass-confirm" placeholder="Repita a nova senha">
+                    </div>
+                  </div>
+                  <button class="btn btn-secondary" onclick="alterarSenha()">Alterar Senha</button>
+                </div>
+                <div class="security-block">
+                  <div class="security-block-title--lg">Autenticação de Dois Fatores (2FA)</div>
+                  <div class="twofa-row">
+                    <div>
+                      <div class="twofa-status-label">Status: <span id="2fa-status">Desativado</span></div>
+                      <div class="twofa-hint">Adicione uma camada extra de proteção com um aplicativo autenticador</div>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" onclick="habilitarAutenticacao2FA()" id="btn-2fa">Ativar 2FA</button>
+                  </div>
+                </div>
+                <div class="security-block">
+                  <div class="security-block-title--lg">Sessões Ativas</div>
+                  <div id="sessions-list">
+                    <div class="sessions-item">
+                      <div>
+                        <div class="sessions-item-name">Navegador Atual</div>
+                        <div class="sessions-item-info">Este dispositivo — Agora</div>
+                      </div>
+                      <span class="sessions-active-badge">ATIVO</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Faturamento -->
+              <div class="settings-panel" id="panel-billing">
+                <div class="panel-title">Informações de Faturamento</div>
+                <div class="billing-plan-card">
+                  <div class="billing-plan-grid">
+                    <div>
+                      <div class="billing-plan-label">Plano Atual</div>
+                      <div class="billing-plan-name">Gratuito</div>
+                      <div class="billing-plan-desc">Funcionalidades básicas de monitoramento</div>
+                    </div>
+                    <div class="billing-plan-action">
+                      <button class="btn btn-primary btn-sm" onclick="atualizarPlano()">Fazer Upgrade de Plano</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="panel-title panel-title--history">Histórico de Pagamentos</div>
+                <div class="table-scroll">
+                  <table class="devices-table">
+                    <thead>
+                      <tr><th>Data</th><th>Descrição</th><th>Valor</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>19/03/2026</td>
+                        <td>Plano Gratuito — Cadastro Inicial</td>
+                        <td>R$ 0,00</td>
+                        <td><span class="sessions-active-badge">Gratuito</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Sobre -->
+              <div class="settings-panel" id="panel-about">
+                <div class="panel-title">Sobre o MONITECH</div>
+                <div class="about-section">
+                  <div class="about-hero">
+                    <div class="about-hero-icon">⚡</div>
+                    <div class="about-hero-title">MONITECH</div>
+                    <div class="about-hero-sub">Monitor de Energia Residencial em Tempo Real</div>
+                  </div>
+                  <div class="info-box">
+                    <div>
+                      <div class="about-info-label">Versão do Software</div>
+                      <div>v2.1.0 (Build 2026.03.19)</div>
+                    </div>
+                    <div>
+                      <div class="about-info-label--mt">Data de Criação</div>
+                      <div>Março de 2026</div>
+                    </div>
+                    <div>
+                      <div class="about-info-label--mt">Desenvolvido por</div>
+                      <div>MONITECH Dev Team</div>
+                    </div>
+                  </div>
+                  <div class="about-desc-box">
+                    <div class="about-desc-text">
+                      <p class="about-desc-p"><strong>MONITECH</strong> é uma plataforma de monitoramento de energia elétrica em tempo real, desenvolvida para residências e pequenos comércios.</p>
+                      <p class="about-desc-p">Com suporte a múltiplos protocolos (WebSocket, HTTP, MQTT e Serial/USB) e sensores como o PZEM-004T e ACS712, oferece análise detalhada de consumo, tensão, corrente e fator de potência.</p>
+                      <p>
+                        <a href="#" class="about-link">Documentação</a> |
+                        <a href="#" class="about-link">Reportar Bug</a> |
+                        <a href="#" class="about-link">Sugestões</a>
+                      </p>
+                    </div>
+                  </div>
+                  <div class="about-actions">
+                    <button class="btn btn-secondary btn-sm" onclick="verificarAtualizacoes()">Verificar Atualizações</button>
+                    <button class="btn btn-secondary btn-sm btn--ml" onclick="exportarDados()">Exportar Dados</button>
+                    <button class="btn btn-danger btn-sm btn--ml" onclick="deletarConta()">Deletar Conta</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <!-- ===== /ABA: CONFIGURAÇÕES ===== -->
+
+
+        <!-- ===== ABA: MINHA CONTA ===== -->
+        <div class="view" id="view-account">
+          <div class="section-header">
+            <div class="section-title">Minha <span>Conta</span></div>
+            <div class="section-subtitle">Gerencie suas informações pessoais e preferências</div>
+          </div>
+
+          <div class="account-layout">
+            <!-- Coluna de Perfil e Avatar -->
+            <div class="account-sidebar">
+              <div class="chart-card account-profile-card">
+                <div class="account-avatar-wrapper">
+                  <div class="account-avatar" id="account-avatar">👤</div>
+                  <button class="btn btn-secondary btn-sm" onclick="document.getElementById('account-avatar-input').click()" title="Alterar foto de perfil">✏ Editar</button>
+                  <input type="file" id="account-avatar-input" accept="image/*" class="input-hidden" onchange="atualizarAvatarConta()">
+                </div>
+                <div class="account-profile-name" id="account-name-display">Carregando...</div>
+                <div class="account-profile-email" id="account-email-display">---</div>
+                <div class="account-profile-role">Membro Ativo</div>
+                <div class="account-member-since">Membro desde <span id="member-date">24 de março de 2026</span></div>
+              </div>
+
+              <div class="chart-card account-quick-stats">
+                <div class="chart-title chart-title--sm">RESUMO DA CONTA</div>
+                <div class="account-stat-item">
+                  <div class="account-stat-label">Residências Cadastradas</div>
+                  <div class="account-stat-value" id="account-residences-count">1</div>
+                </div>
+                <div class="account-stat-item">
+                  <div class="account-stat-label">Dispositivos Configurados</div>
+                  <div class="account-stat-value" id="account-devices-count">0</div>
+                </div>
+                <div class="account-stat-item">
+                  <div class="account-stat-label">Plano Atual</div>
+                  <div class="account-stat-value account-plan-badge">GRATUITO</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coluna de Formulários -->
+            <div class="account-main">
+              <!-- Seção 1: Informações Pessoais -->
+              <div class="account-section">
+                <div class="account-section-title">Informações Pessoais</div>
+                <div class="account-section-desc">Atualize seus dados de contato e perfil</div>
+                
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Nome Completo</label>
+                    <input class="form-input" type="text" id="account-name" placeholder="Seu nome completo">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">E-mail Registrado</label>
+                    <input class="form-input" type="email" id="account-email" placeholder="seu@email.com" readonly>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Telefone (opcional)</label>
+                    <input class="form-input" type="tel" id="account-phone" placeholder="(XX) XXXXX-XXXX">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Data de Nascimento (opcional)</label>
+                    <input class="form-input" type="date" id="account-birth">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Gênero (opcional)</label>
+                  <select class="form-input" id="account-gender">
+                    <option value="">Prefiro não informar</option>
+                    <option value="masculino">Masculino</option>
+                    <option value="feminino">Feminino</option>
+                    <option value="outro">Outro</option>
+                  </select>
+                </div>
+
+                <div class="account-section-actions">
+                  <button class="btn btn-primary" onclick="salvarAlteracoesConta()">💾 Salvar Alterações</button>
+                </div>
+              </div>
+
+              <!-- Seção 2: Segurança e Senha -->
+              <div class="account-section">
+                <div class="account-section-title">Segurança</div>
+                <div class="account-section-desc">Proteja sua conta com uma senha forte</div>
+                
+                <div class="security-alert-box" id="security-2fa-inactive">
+                  <span class="security-alert-icon">🔐</span>
+                  <div>
+                    <div class="security-alert-title">Autenticação de Dois Fatores não ativada</div>
+                    <div class="security-alert-text">Ative a verificação em duas etapas para maior segurança</div>
+                  </div>
+                  <button class="btn btn-secondary btn-sm" onclick="ativar2FA()" style="white-space: nowrap;">Ativar 2FA</button>
+                </div>
+
+                <div class="divider-thin"></div>
+
+                <div class="security-section-title">Alterar Senha</div>
+                <div class="form-group">
+                  <label class="form-label">Senha Atual</label>
+                  <input class="form-input" type="password" id="account-pass-current" placeholder="Digite sua senha atual">
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Nova Senha</label>
+                    <input class="form-input" type="password" id="account-pass-new" placeholder="Mínimo 8 caracteres">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Confirmar Nova Senha</label>
+                    <input class="form-input" type="password" id="account-pass-confirm" placeholder="Repita a nova senha">
+                  </div>
+                </div>
+
+                <div class="account-section-actions">
+                  <button class="btn btn-secondary" onclick="alterarSenhaConta()">🔑 Alterar Senha</button>
+                </div>
+              </div>
+
+              <!-- Seção 3: Preferências de Notificação -->
+              <div class="account-section">
+                <div class="account-section-title">Notificações</div>
+                <div class="account-section-desc">Escolha como deseja ser notificado sobre eventos importantes</div>
+                
+                <div class="notification-group">
+                  <div class="notification-item">
+                    <div class="notification-checkbox">
+                      <input type="checkbox" id="notify-email-alerts" checked>
+                      <label for="notify-email-alerts" class="notification-label">
+                        <div class="notification-title">Alertas por E-mail</div>
+                        <div class="notification-desc">Receba notificações de consumo anômalo ou limite atingido</div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="notification-item">
+                    <div class="notification-checkbox">
+                      <input type="checkbox" id="notify-email-summary" checked>
+                      <label for="notify-email-summary" class="notification-label">
+                        <div class="notification-title">Resumo Semanário por E-mail</div>
+                        <div class="notification-desc">Receba um sumário do seu consumo de energia toda segunda-feira</div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="notification-item">
+                    <div class="notification-checkbox">
+                      <input type="checkbox" id="notify-browser" checked>
+                      <label for="notify-browser" class="notification-label">
+                        <div class="notification-title">Notificações no Navegador</div>
+                        <div class="notification-desc">Receba alertas em tempo real enquanto está usando o sistema</div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="notification-item">
+                    <div class="notification-checkbox">
+                      <input type="checkbox" id="notify-sound">
+                      <label for="notify-sound" class="notification-label">
+                        <div class="notification-title">Som nas Notificações</div>
+                        <div class="notification-desc">Reproduza um som ao receber um alerta de consumo anômalo</div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Frequência de Resumos</label>
+                  <select class="form-input" id="account-summary-frequency">
+                    <option value="daily">Diário</option>
+                    <option value="weekly" selected>Semanal</option>
+                    <option value="monthly">Mensal</option>
+                    <option value="never">Nunca</option>
+                  </select>
+                </div>
+
+                <div class="account-section-actions">
+                  <button class="btn btn-primary" onclick="salvarNotificacoesConta()">🔔 Salvar Preferências</button>
+                </div>
+              </div>
+
+              <!-- Seção 4: Privacidade e Dados -->
+              <div class="account-section">
+                <div class="account-section-title">Privacidade e Dados</div>
+                <div class="account-section-desc">Controle seus dados pessoais e privacidade</div>
+                
+                <div class="data-control-item">
+                  <div>
+                    <div class="data-control-title">Exportar Meus Dados</div>
+                    <div class="data-control-desc">Baixe uma cópia de todos os seus dados em formato JSON. Inclui perfil, residência, dispositivos e histórico.</div>
+                  </div>
+                  <button class="btn btn-secondary btn-sm" onclick="exportarMeusDados()">📥 Exportar</button>
+                </div>
+
+                <div class="data-control-item">
+                  <div>
+                    <div class="data-control-title">Deletar Minha Conta</div>
+                    <div class="data-control-desc">Remova permanentemente sua conta e todos os dados associados. Esta ação não pode ser desfeita.</div>
+                  </div>
+                  <button class="btn btn-danger btn-sm" onclick="iniciarExclusaoConta()">❌ Deletar Conta</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <!-- ===== /ABA: MINHA CONTA ===== -->
+
+      </div>
+      <!-- /CONTEÚDO PRINCIPAL -->
+
+    </div>
+  </div>
+  <!-- ===== /APLICAÇÃO PRINCIPAL ===== -->
+
+
+  <!-- MODAL: Novo Cômodo -->
+  <div class="modal-overlay" id="modal-room">
+    <div class="modal">
+      <div class="modal-title">NOVO CÔMODO</div>
+      <div class="form-group">
+        <label class="form-label">Tipo do Cômodo</label>
+        <select class="form-input" id="modal-room-type">
+          <option value="sala">Sala de Estar</option>
+          <option value="quarto">Quarto</option>
+          <option value="cozinha">Cozinha</option>
+          <option value="banheiro">Banheiro</option>
+          <option value="garagem">Garagem</option>
+          <option value="escritorio">Escritório</option>
+          <option value="lavanderia">Lavanderia</option>
+          <option value="varanda">Varanda</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nome do Cômodo</label>
+        <input class="form-input" id="modal-room-name" placeholder="Ex: Quarto Principal">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="fecharModal('modal-room')">CANCELAR</button>
+        <button class="btn btn-primary modal-btn--auto" onclick="adicionarComodoDoModal()">+ ADICIONAR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Novo Dispositivo -->
+  <div class="modal-overlay" id="modal-device">
+    <div class="modal">
+      <div class="modal-title">NOVO DISPOSITIVO</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Tipo de Dispositivo</label>
+          <select class="form-input" id="modal-dev-type">
+            <option value="ar">Ar-condicionado</option>
+            <option value="geladeira">Geladeira</option>
+            <option value="tv">Televisão</option>
+            <option value="maquina">Máq. de Lavar</option>
+            <option value="chuveiro">Chuveiro Elétrico</option>
+            <option value="computador">Computador / Notebook</option>
+            <option value="microondas">Micro-ondas</option>
+            <option value="iluminacao">Iluminação</option>
+            <option value="bomba">Bomba d'água</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nome do Dispositivo</label>
+          <input class="form-input" id="modal-dev-name" placeholder="Ex: Ar-condicionado Sala">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Cômodo</label>
+          <select class="form-input" id="modal-dev-room"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Potência (W)</label>
+          <input class="form-input" type="number" id="modal-dev-watts" placeholder="Ex: 1500">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ID do Dispositivo IoT (opcional)</label>
+        <input class="form-input" id="modal-dev-id" placeholder="Ex: MONITECH-002">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="fecharModal('modal-device')">CANCELAR</button>
+        <button class="btn btn-primary modal-btn--auto" onclick="adicionarDispositivoDoModal()">+ ADICIONAR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Aviso sobre Dispositivo de Medição -->
+  <div class="modal-overlay" id="modal-alert">
+    <div class="modal">
+      <div class="modal-title">AVISO IMPORTANTE</div>
+      <div class="modal-body-text">
+        Para receber leituras de energia em tempo real, você precisa conectar um
+        <strong>dispositivo de medição Dispositivo Monitech</strong> ao seu painel.
+        Ele irá monitorar tensão, corrente, potência e consumo da sua residência continuamente.
+      </div>
+      <div class="modal-guide-box">
+        <div class="modal-guide-title"><strong>Como configurar o dispositivo:</strong></div>
+        <ul class="modal-guide-list">
+          <li>Monte um Dispositivo Monitech com o sensor de medição PZEM-004T</li>
+          <li>Conecte o dispositivo à sua rede Wi-Fi doméstica</li>
+          <li>Acesse a aba <strong>"Dispositivo MONITECH"</strong> no painel</li>
+          <li>Escolha o protocolo de comunicação: WebSocket, HTTP ou MQTT</li>
+          <li>Insira o IP do Dispositivo Monitech e clique em <strong>CONECTAR</strong></li>
+        </ul>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" onclick="fecharModal('modal-alert'); entrarNoApp();">ACESSAR O PAINEL</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="./js/script.js" defer></script>
+</body>
+
+</html>
